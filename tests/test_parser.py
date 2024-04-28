@@ -19,6 +19,7 @@ class TestAuth(TestCase):
         expression_tree = pre_authorize_expression("has_any_role('abc', 'def') and has_authority('abc')")
         self.assertIsInstance(expression_tree, And)
         self.assertIsInstance(expression_tree.items[0], AnyRole)
+        # We have already checked the type
         self.assertEqual(expression_tree.items[0].values, ('abc', 'def'))
         self.assertIsInstance(expression_tree.items[1], Authority)
         self.assertEqual(expression_tree.items[1].value, 'abc')

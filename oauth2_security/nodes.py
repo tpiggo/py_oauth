@@ -1,5 +1,4 @@
 import dataclasses
-import functools
 import inspect
 from abc import ABC
 from typing import Type, Union
@@ -13,22 +12,27 @@ class Node:
 
 
 class Mappable:
-    __function_name__: str = None
+    @property
+    def __function_name__(self) -> str:
+        raise NotImplementedError("Requires implementation")
 
 
-registry = {}
+"""
+Flyway registry for handling node types (only terminal types in the tree are named nodes)
+"""
+registry: dict[str, Type[Node]] = {}
 
 
-def _validate_register(cls: Union[callable, Type["Mappable"]]):
+def validate_register(cls: Union[callable, Type["Mappable"]]):
     if inspect.isfunction(cls):
-        return _validate_register(cls())
+        return validate_register(cls())
     if not cls.__function_name__:
         raise ValueError("No function name associated to this type")
     registry[cls.__function_name__] = cls
     return cls
 
 
-@_validate_register
+@validate_register
 @dataclasses.dataclass
 class Authority(Node, Mappable):
     value: str
@@ -38,7 +42,7 @@ class Authority(Node, Mappable):
         return self.value in v.granted_authorities
 
 
-@_validate_register
+@validate_register
 @dataclasses.dataclass
 class Role(Node, Mappable):
     value: str
@@ -48,7 +52,7 @@ class Role(Node, Mappable):
         return self.value in v.granted_roles
 
 
-@_validate_register
+@validate_register
 class AnyRole(Node, Mappable):
     values: tuple[str]
     __function_name__ = 'has_any_role'
