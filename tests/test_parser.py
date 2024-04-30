@@ -27,9 +27,29 @@ class TestAuth(TestCase):
     def test_build_invalid(self):
         def throwable():
             pre_authorize_expression("import dataclass; has_any_role('abc', 'def')")
+
         self.assertRaises(InvalidTypeError, throwable)
 
     def test_build_invalid_name(self):
         def throwable():
             pre_authorize_expression("has_any_role_typo('abc', 'def')")
+
         self.assertRaises(InvalidNameError, throwable)
+
+    def test_build_invalid_empty_string_expression(self):
+        def throwable():
+            pre_authorize_expression("has_any_role('')")
+
+        self.assertRaises(ValueError, throwable)
+
+    def test_build_invalid_type_expression(self):
+        def throwable():
+            pre_authorize_expression("has_any_role(1)")
+
+        self.assertRaises(TypeError, throwable)
+
+    def test_build_invalid_no_constant_expression(self):
+        def throwable():
+            pre_authorize_expression("has_any_role(x)")
+
+        self.assertRaises(TypeError, throwable)
